@@ -1,0 +1,27 @@
+name: Build Owlbear TAR
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: docker build -t owlbear-legacy .
+
+      - name: Save Docker image
+        run: docker save owlbear-legacy -o owlbear-legacy.tar
+
+      - name: Compress image
+        run: gzip owlbear-legacy.tar
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: owlbear-image
+          path: owlbear-legacy.tar.gz
