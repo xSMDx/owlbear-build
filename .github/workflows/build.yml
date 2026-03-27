@@ -1,4 +1,4 @@
-name: Build Owlbear TAR
+name: Build Owlbear TAR from ZIP
 
 on:
   workflow_dispatch:
@@ -8,18 +8,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      # 1. Checkout repo
+      - name: Checkout
+        uses: actions/checkout@v4
 
+      # 2. Install unzip (needed on Ubuntu)
+      - name: Install unzip
+        run: sudo apt-get update && sudo apt-get install -y unzip
+
+      # 3. Extract the ZIP
+      - name: Extract ZIP
+        run: unzip owlbear-rodeo-legacy-main.zip
+
+      # 4. Build Docker image from extracted folder
       - name: Build Docker image
-        run: docker build -t owlbear-legacy ./owlbear-rodeo-legacy-master
+        run: docker build -t owlbear-legacy ./owlbear-rodeo-legacy-main
 
+      # 5. Save Docker image to tar
       - name: Save Docker image
         run: docker save owlbear-legacy -o owlbear-legacy.tar
 
+      # 6. Compress tar
       - name: Compress image
         run: gzip owlbear-legacy.tar
 
+      # 7. Upload artifact
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
